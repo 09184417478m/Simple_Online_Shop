@@ -1,0 +1,53 @@
+
+""" if needed to add admin confirmation  for comments(oponions)
+
+from shop.serializers import Opinion_add_Serializer
+
+
+class ProductOpinionsListView(generics.ListAPIView):
+    serializer_class = Opinion_add_Serializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        product_id = self.kwargs['product_id']
+        return Opinion.objects.filter(product_id=product_id, is_approved=True)
+
+
+
+
+class OpinionAddView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, product_id, *args, **kwargs):
+        try:
+            product = Product.objects.get(product_id=product_id)
+        except Product.DoesNotExist:
+            raise NotFound("Product not found")
+        
+        serializer = Opinion_add_Serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Save the opinion with is_approved set to False
+        serializer.save(user=request.user, product=product, is_approved=False)
+        
+        return Response({"detail": "Opinion submitted successfully and is pending approval."}, status=status.HTTP_201_CREATED)
+
+        
+        
+from django.contrib import admin
+from .models import Opinion
+
+class OpinionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'comment', 'date_time', 'is_approved')
+    list_filter = ('is_approved', 'date_time')
+    search_fields = ('user__username', 'product__name', 'comment')
+    actions = ['approve_opinions']
+
+    def approve_opinions(self, request, queryset):
+        queryset.update(is_approved=True)
+        self.message_user(request, "Selected opinions have been approved.")
+    approve_opinions.short_description = "Approve selected opinions"
+
+admin.site.register(Opinion, OpinionAdmin)
+
+"""

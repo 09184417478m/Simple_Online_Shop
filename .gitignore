@@ -1,0 +1,5 @@
+myenv/
+.idea/
+simple_online_shop/__pycache__/
+shop/__pycache__/
+shop/migrations/__pycache__

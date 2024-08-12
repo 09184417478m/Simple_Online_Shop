@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db_pg:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      SQL_DATABASE: simpleonlineshop_database
+      SQL_USER: postgres
+      SQL_PASSWORD: 09902048023M.sh
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:7000
+    volumes:
+      - .:/code
+    ports:
+      - "7000:7000"
+    depends_on:
+      - db_pg
+    environment:
+      DATABASE: postgres
+      SQL_HOST: db_pg
+      SQL_PORT: 5432
+      SQL_DATABASE: simpleonlineshop_database
+      SQL_USER: postgres
+      SQL_PASSWORD: 09902048023M.sh
+
+volumes:
+  postgres_data:
